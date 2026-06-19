@@ -4,9 +4,11 @@ import {
   sampleArea,
   calcCorrection,
   applyCorrection,
+  canvasToBase64,
 } from "./white-balance.js";
 
 const MAX_DISPLAY_W = 720;
+const DIAGNOSE_URL = "/api/diagnose";
 
 // 画面の骨組み
 const app = document.getElementById("app");
@@ -39,16 +41,21 @@ app.innerHTML = `
 
     <div class="step hidden" id="step3">
       <div class="step-head"><div class="step-no">3</div><div class="step-title">補正結果</div></div>
-      <div class="step-desc">左が元画像、右が補正後です。次のステップでこの補正済み画像を診断にかけます。</div>
+      <div class="step-desc">左が元画像、右が補正後です。補正後の画像で診断します。</div>
       <div class="compare">
         <figure><figcaption>補正前</figcaption><canvas id="beforeCanvas"></canvas></figure>
         <figure><figcaption>補正後</figcaption><canvas id="afterCanvas"></canvas></figure>
       </div>
       <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
         <button class="ghost" id="redoBtn">別の場所をタップし直す</button>
-        <button id="diagnoseBtn" disabled>この画像で診断する（次ステップで実装）</button>
+        <button id="diagnoseBtn">この画像で診断する</button>
       </div>
       <p class="muted-note">補正済み画像はこの後 Claude vision に送られます。EXIF（位置情報・撮影時刻）はcanvas処理で自動的に除去されます。</p>
+    </div>
+
+    <div class="step hidden" id="step4">
+      <div class="step-head"><div class="step-no">4</div><div class="step-title">診断結果（最小表示）</div></div>
+      <div id="resultBox"></div>
     </div>
   </div>
 `;
@@ -59,6 +66,7 @@ const els = {
   loadStatus: document.getElementById("loadStatus"),
   step2: document.getElementById("step2"),
   step3: document.getElementById("step3"),
+  step4: document.getElementById("step4"),
   src: document.getElementById("srcCanvas"),
   tapHint: document.getElementById("tapHint"),
   marker: document.getElementById("marker"),
@@ -66,10 +74,12 @@ const els = {
   before: document.getElementById("beforeCanvas"),
   after: document.getElementById("afterCanvas"),
   redoBtn: document.getElementById("redoBtn"),
+  diagnoseBtn: document.getElementById("diagnoseBtn"),
+  resultBox: document.getElementById("resultBox"),
 };
 
-let baseCanvas = null;       // 縮小済みの処理用canvas
-let correctedCanvas = null;  // 補正後canvas(診断で使う)
+let baseCanvas = null;
+let correctedCanvas = null;
 let displayScale = 1;
 
 els.pickBtn.addEventListener("click", () => { els.file.value = ""; els.file.click(); });
@@ -81,6 +91,7 @@ els.redoBtn.addEventListener("click", () => {
   els.marker.style.display = "none";
   els.statusBox.innerHTML = "";
 });
+els.diagnoseBtn.addEventListener("click", onDiagnose);
 
 async function onFile(e) {
   const f = e.target.files && e.target.files[0];
@@ -92,6 +103,7 @@ async function onFile(e) {
     showLoad("", "");
     els.step2.classList.remove("hidden");
     els.step3.classList.add("hidden");
+    els.step4.classList.add("hidden");
     els.tapHint.style.display = "grid";
     els.marker.style.display = "none";
     els.statusBox.innerHTML = "";
@@ -155,15 +167,101 @@ function renderCompare() {
   els.after.getContext("2d").drawImage(correctedCanvas, 0, 0, dw, dh);
 
   els.step3.classList.remove("hidden");
+  els.step4.classList.add("hidden");
   els.step3.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
+// === 診断呼び出し ===
+async function onDiagnose() {
+  if (!correctedCanvas) return;
+  if (!DIAGNOSE_URL) {
+    showResultRaw("warn", "診断APIのURLが設定されていません（.env の VITE_DIAGNOSE_URL を確認してください）。");
+    els.step4.classList.remove("hidden");
+    return;
+  }
+
+  els.diagnoseBtn.disabled = true;
+  els.diagnoseBtn.textContent = "診断中…";
+  els.step4.classList.remove("hidden");
+  showResultRaw("info", "Claude vision が診断しています…（10〜20秒ほどかかります）");
+  els.step4.scrollIntoView({ behavior: "smooth", block: "start" });
+
+  try {
+    const imageBase64 = canvasToBase64(correctedCanvas, 0.92);
+    const res = await fetch(DIAGNOSE_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ imageBase64, mediaType: "image/jpeg" }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      showResultRaw("warn", data.error || "診断に失敗しました。もう一度お試しください。");
+      return;
+    }
+    renderResultMinimal(data);
+  } catch (err) {
+    showResultRaw("warn", "通信エラーが発生しました: " + err.message);
+  } finally {
+    els.diagnoseBtn.disabled = false;
+    els.diagnoseBtn.textContent = "この画像で診断する";
+  }
+}
+
+// 最小表示: 返ってきたJSONを整形して並べるだけ（疎通・精度確認用）
+function renderResultMinimal(d) {
+  const colorChips = (d.colors || [])
+    .map(
+      (c) =>
+        `<div style="display:flex;align-items:center;gap:8px;">
+           <span style="width:28px;height:28px;border-radius:6px;border:1px solid rgba(0,0,0,.12);background:${c.hex};"></span>
+           <span style="font-size:13px;">${c.name} <span style="color:var(--mute);font-variant-numeric:tabular-nums;">${c.hex}</span></span>
+         </div>`
+    )
+    .join("");
+
+  const axes = d.axes || {};
+  els.resultBox.innerHTML = `
+    <div style="display:grid;gap:14px;">
+      <div>
+        <div style="font-size:22px;font-weight:800;">${d.season_label || d.season}</div>
+        <div style="font-size:12px;color:var(--mute);">確度: ${d.confidence || "—"}</div>
+      </div>
+
+      <div style="font-size:13px;">
+        <strong>4軸評価</strong><br>
+        色相: ${axes.hue ?? "—"} / 明度: ${axes.value ?? "—"} / 彩度: ${axes.chroma ?? "—"} / 清濁: ${axes.clarity ?? "—"}
+      </div>
+
+      <div style="font-size:13px;">
+        <strong>特徴</strong><br>
+        肌: ${d.features?.skin ?? "—"}<br>
+        髪: ${d.features?.hair ?? "—"}<br>
+        瞳: ${d.features?.eyes ?? "—"}
+      </div>
+
+      <div>
+        <strong style="font-size:13px;">似合う色</strong>
+        <div style="display:grid;gap:8px;margin-top:8px;">${colorChips}</div>
+      </div>
+
+      <div style="font-size:13px;">
+        <strong>アドバイス</strong><br>${d.advice ?? "—"}
+      </div>
+
+      <div style="font-size:12px;color:var(--mute);border-top:1px solid var(--line);padding-top:10px;">
+        ${d.counseling_hook ?? ""}
+      </div>
+    </div>
+  `;
+}
+
+function showResultRaw(type, msg) {
+  els.resultBox.innerHTML = `<div class="status ${type}">${msg}</div>`;
+}
 function showLoad(type, msg) {
   els.loadStatus.innerHTML = msg ? `<div class="status ${type}" style="margin-top:12px">${msg}</div>` : "";
 }
 function showStatus(type, msg) {
   els.statusBox.innerHTML = `<div class="status ${type}">${msg}</div>`;
 }
-
-// 次ステップで使う: correctedCanvas を base64 にして Functions へ送る
-// （diagnoseBtn のハンドラは次のステップで実装）

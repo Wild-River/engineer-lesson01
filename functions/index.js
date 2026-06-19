@@ -52,7 +52,7 @@ function buildSystemPrompt() {
 function buildUserText() {
     return `この顔写真をパーソナルカラー診断してください。
 
-判定後、その人に特に似合う色を、判定したシーズンの下記パレットから4〜6個選び、その id を best_color_ids に入れてください。パレットにない id を作らないこと。
+判定後、その人に特に似合う色を、判定したシーズンの下記パレットから8個選び、その id を best_color_ids に入れてください。パレットにない id を作らないこと。
 
 春パレット: ${paletteListText("spring")}
 夏パレット: ${paletteListText("summer")}
@@ -65,7 +65,7 @@ function buildUserText() {
   "season": "spring|summer|autumn|winter",
   "confidence": "high|medium|low",
   "features": { "skin": "肌の特徴（日本語30字程度）", "hair": "髪の特徴", "eyes": "瞳の特徴" },
-  "best_color_ids": ["判定シーズンのidを4〜6個"],
+  "best_color_ids": ["判定シーズンのidを8個"],
   "advice": "似合う色の傾向と着こなしのアドバイス（日本語80字程度）",
   "counseling_hook": "プロのカウンセリングへ自然につなげる一言（日本語60字程度）"
 }`;

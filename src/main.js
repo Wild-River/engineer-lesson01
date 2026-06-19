@@ -6,9 +6,12 @@ import {
   applyCorrection,
   canvasToBase64,
 } from "./white-balance.js";
+import { buildResultHTML, setupRing, setupCta } from "./result-view.js";
 
 const MAX_DISPLAY_W = 720;
 const DIAGNOSE_URL = "/api/diagnose";
+// カウンセリングCTAの仮リンク（後で本番URLに差し替え）
+const COUNSELING_URL = "https://example.com/counseling";
 
 // 画面の骨組み
 const app = document.getElementById("app");
@@ -53,8 +56,7 @@ app.innerHTML = `
       <p class="muted-note">補正済み画像はこの後 Claude vision に送られます。EXIF（位置情報・撮影時刻）はcanvas処理で自動的に除去されます。</p>
     </div>
 
-    <div class="step hidden" id="step4">
-      <div class="step-head"><div class="step-no">4</div><div class="step-title">診断結果（最小表示）</div></div>
+    <div class="hidden" id="step4">
       <div id="resultBox"></div>
     </div>
   </div>
@@ -199,7 +201,7 @@ async function onDiagnose() {
       showResultRaw("warn", data.error || "診断に失敗しました。もう一度お試しください。");
       return;
     }
-    renderResultMinimal(data);
+    renderResult(data);
   } catch (err) {
     showResultRaw("warn", "通信エラーが発生しました: " + err.message);
   } finally {
@@ -208,52 +210,28 @@ async function onDiagnose() {
   }
 }
 
-// 最小表示: 返ってきたJSONを整形して並べるだけ（疎通・精度確認用）
-function renderResultMinimal(d) {
-  const colorChips = (d.colors || [])
-    .map(
-      (c) =>
-        `<div style="display:flex;align-items:center;gap:8px;">
-           <span style="width:28px;height:28px;border-radius:6px;border:1px solid rgba(0,0,0,.12);background:${c.hex};"></span>
-           <span style="font-size:13px;">${c.name} <span style="color:var(--mute);font-variant-numeric:tabular-nums;">${c.hex}</span></span>
-         </div>`
-    )
-    .join("");
-
-  const axes = d.axes || {};
-  els.resultBox.innerHTML = `
-    <div style="display:grid;gap:14px;">
-      <div>
-        <div style="font-size:22px;font-weight:800;">${d.season_label || d.season}</div>
-        <div style="font-size:12px;color:var(--mute);">確度: ${d.confidence || "—"}</div>
-      </div>
-
-      <div style="font-size:13px;">
-        <strong>4軸評価</strong><br>
-        色相: ${axes.hue ?? "—"} / 明度: ${axes.value ?? "—"} / 彩度: ${axes.chroma ?? "—"} / 清濁: ${axes.clarity ?? "—"}
-      </div>
-
-      <div style="font-size:13px;">
-        <strong>特徴</strong><br>
-        肌: ${d.features?.skin ?? "—"}<br>
-        髪: ${d.features?.hair ?? "—"}<br>
-        瞳: ${d.features?.eyes ?? "—"}
-      </div>
-
-      <div>
-        <strong style="font-size:13px;">似合う色</strong>
-        <div style="display:grid;gap:8px;margin-top:8px;">${colorChips}</div>
-      </div>
-
-      <div style="font-size:13px;">
-        <strong>アドバイス</strong><br>${d.advice ?? "—"}
-      </div>
-
-      <div style="font-size:12px;color:var(--mute);border-top:1px solid var(--line);padding-top:10px;">
-        ${d.counseling_hook ?? ""}
-      </div>
-    </div>
-  `;
+// 本番の結果画面を描画
+function renderResult(data) {
+  els.resultBox.innerHTML = buildResultHTML(data);
+  // 円環の色玉を配置（DOM挿入後に呼ぶ）
+  setupRing(data.colors || []);
+  // カウンセリングCTAの仮リンクを設定
+  setupCta(COUNSELING_URL);
+  // リスタートボタン
+  const restartBtn = document.getElementById("restartBtn");
+  if (restartBtn) {
+    restartBtn.addEventListener("click", () => {
+      els.step4.classList.add("hidden");
+      els.step2.classList.add("hidden");
+      els.step3.classList.add("hidden");
+      els.resultBox.innerHTML = "";
+      els.file.value = "";
+      baseCanvas = null;
+      correctedCanvas = null;
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  }
+  els.step4.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function showResultRaw(type, msg) {

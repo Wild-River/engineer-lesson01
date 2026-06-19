@@ -11,11 +11,11 @@ import { buildResultHTML, setupRing, setupCta } from "./result-view.js";
 const MAX_DISPLAY_W = 720;
 const DIAGNOSE_URL = "/api/diagnose";
 // カウンセリングCTAの仮リンク（後で本番URLに差し替え）
-const COUNSELING_URL = "https://example.com/counseling";
+const COUNSELING_URL = "https://beauty.hotpepper.jp/";
 
 // 画面の骨組み
 const app = document.getElementById("app");
-app.innerHTML = `
+app.innerHTML = /*html*/`
   <div class="wrap">
     <header>
       <div class="eyebrow">Personal Color</div>

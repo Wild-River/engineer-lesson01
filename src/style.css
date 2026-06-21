@@ -2,10 +2,11 @@
   --ink: #1a1d24;
   --paper: #f7f5f0;
   --line: #d8d3c7;
-  --accent: #c2502f;
-  --ok: #3f7a52;
+  --accent: #8c5c32;
+  --ok: #d9a577;
   --warn: #c4892f;
   --mute: #76716a;
+  --btn: #d97b66;
 }
 * {
   box-sizing: border-box;
@@ -19,6 +20,9 @@ body {
   line-height: 1.7;
   padding: 24px 16px 64px;
   -webkit-font-smoothing: antialiased;
+}
+h1 {
+  font-weight: normal;
 }
 .wrap {
   max-width: 760px;
@@ -34,7 +38,7 @@ header {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--accent);
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 6px;
 }
 h1 {
@@ -42,15 +46,9 @@ h1 {
   font-weight: 800;
   letter-spacing: -0.01em;
 }
-.sub {
-  color: var(--mute);
-  font-size: 13px;
-  margin-top: 6px;
-}
 
 .step {
   background: #fff;
-  border: 1px solid var(--line);
   border-radius: 12px;
   padding: 20px;
   margin-bottom: 18px;
@@ -65,7 +63,7 @@ h1 {
   font-size: 12px;
   font-weight: 800;
   color: #fff;
-  background: var(--ink);
+  background: var(--btn);
   width: 22px;
   height: 22px;
   border-radius: 50%;
@@ -76,7 +74,7 @@ h1 {
 }
 .step-title {
   font-size: 15px;
-  font-weight: 700;
+  font-weight: 600;
 }
 .step-desc {
   font-size: 13px;
@@ -87,15 +85,16 @@ h1 {
 button {
   font-family: inherit;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   padding: 11px 18px;
   border-radius: 9px;
   border: none;
   cursor: pointer;
-  background: var(--ink);
+  background: var(--btn);
   color: #fff;
   transition: opacity 0.15s;
 }
+
 button:hover {
   opacity: 0.88;
 }
@@ -104,6 +103,7 @@ button:disabled {
   cursor: not-allowed;
 }
 button.ghost {
+  font-family: 'Hiragino Sans', sans-serif;
   background: transparent;
   color: var(--ink);
   border: 1.5px solid var(--ink);
@@ -119,7 +119,6 @@ input[type='file'] {
   border-radius: 10px;
   overflow: hidden;
   background: #f0ede6;
-  border: 1px solid var(--line);
 }
 .canvas-stage canvas {
   display: block;
@@ -139,7 +138,7 @@ input[type='file'] {
   background: var(--ink);
   color: #fff;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   padding: 7px 13px;
   border-radius: 20px;
   opacity: 0.9;
@@ -163,18 +162,16 @@ input[type='file'] {
   margin-top: 14px;
 }
 .compare figure {
-  border: 1px solid var(--line);
   border-radius: 10px;
   overflow: hidden;
   background: #fff;
 }
 .compare figcaption {
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.04em;
   padding: 8px 10px;
   background: var(--paper);
-  border-bottom: 1px solid var(--line);
   color: var(--mute);
 }
 .compare canvas {
@@ -196,7 +193,7 @@ input[type='file'] {
   margin-top: 12px;
 }
 .status.ok {
-  background: #eaf3ee;
+  background: var(--paper);
   color: var(--ok);
 }
 .status.warn {
@@ -204,8 +201,8 @@ input[type='file'] {
   color: var(--warn);
 }
 .status.info {
-  background: #eef1f5;
-  color: #3a4555;
+  background: var(--paper);
+  color: var(--ok);
 }
 
 .muted-note {
@@ -235,6 +232,7 @@ input[type='file'] {
   margin-bottom: 20px;
 }
 .r-season-en {
+  font-family: 'Hiragino Sans', sans-serif;
   font-size: 13px;
   letter-spacing: 0.4em;
   text-transform: uppercase;
@@ -509,25 +507,15 @@ input[type='file'] {
   text-decoration: none;
   transition: background 0.2s;
 }
+
 .cta-btn:hover {
-  background: var(--ink);
+  opacity: 0.88;
 }
 
 /* リスタート・免責 */
 .restart {
   text-align: center;
   margin-top: 36px;
-}
-.restart button {
-  font-family: 'Hiragino Sans', sans-serif;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  color: var(--mute);
-  background: none;
-  border: none;
-  border-bottom: 1px solid var(--line);
-  padding: 4px 2px;
-  cursor: pointer;
 }
 .r-disclaimer {
   font-family: 'Hiragino Sans', sans-serif;
@@ -537,4 +525,71 @@ input[type='file'] {
   text-align: center;
   margin-top: 44px;
   opacity: 0.8;
+}
+
+/* ===== 撮影ガイド画面（サロン風） ===== */
+.guide {
+  /* font-family: 'Hiragino Mincho ProN', 'Yu Mincho', serif; */
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 8px 0;
+}
+.guide-lead {
+  text-align: center;
+  font-size: 17px;
+  line-height: 2;
+  letter-spacing: 0.03em;
+  color: var(--ink);
+  padding: 16px 0 36px;
+}
+.guide-points {
+  display: grid;
+  gap: 28px;
+}
+.guide-point {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 18px;
+  align-items: start;
+}
+.gp-num {
+  font-family: 'Hiragino Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  padding-top: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.gp-title {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+.gp-text {
+  font-family: 'Hiragino Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--mute);
+}
+.guide-action {
+  text-align: center;
+  margin-top: 44px;
+}
+.guide-start {
+  font-family: 'Hiragino Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #fff;
+  background: var(--btn);
+  border: none;
+  border-radius: 100px;
+  padding: 16px 48px;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.guide-start:hover {
+  opacity: 0.88;
 }

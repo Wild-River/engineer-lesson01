@@ -25,8 +25,17 @@ const SEASON_THEME = {
   },
 };
 
-// 4軸の表示定義（左ラベル / 右ラベル / アクティブ側）
-// value は診断結果の文字列、posは0〜100でドット位置を決める
+/**
+ * 4軸の評価値を、目盛り上のドット位置（0〜100%）に変換する。
+ *
+ * 結果画面の「診断の根拠」で、各軸（色相・明度・彩度・清濁）の評価を
+ * 横棒上のドットで示すために使う。診断APIが返す文字列（"warm"、"high"など）を、
+ * 対応する位置のパーセント値に変換する。
+ *
+ * @param {string} axisKey - 軸の種類（"hue"|"value"|"chroma"|"clarity"）。
+ * @param {string} value - その軸の評価値（軸により "warm"/"cool"、"high"/"mid"/"low" など）。
+ * @returns {number} ドットの位置（0〜100）。対応する値がなければ中央の50を返す。
+ */
 function axisPosition(axisKey, value) {
   // 各軸の値を 0〜100 の位置に変換
   const maps = {
@@ -48,7 +57,25 @@ const AXIS_DEFS = [
 const CONFIDENCE_LABEL = { high: "高", medium: "中", low: "低" };
 
 /**
- * 結果画面のHTML文字列を生成
+ * 診断結果データから、結果画面のHTML文字列を生成する。
+ *
+ * シーズン・4軸・特徴・似合う色・アドバイス・カウンセリングCTAを含む
+ * 結果画面全体を組み立てる。診断されたシーズンに応じて、画面のアクセント色（CSS変数 --season など）を切り替えるのが特徴。
+ * 春なら暖色、夏なら青み、というように、結果がデザインに反映される。 
+ *
+ * 4軸の各ドット位置は axisPosition で計算し、評価値に応じてラベルを強調する。
+ * 色玉そのもの（円環パレット）はこの時点では器だけを用意し、実際の配置は
+ * HTML挿入後に setupRing が行う（DOMが存在してから座標計算するため）。
+ *
+ * @param {Object} data - 診断APIが返したJSON。
+ * @param {string} data.season - シーズン（"spring"|"summer"|"autumn"|"winter"）。
+ * @param {Object} data.axes - 4軸の評価（hue/value/chroma/clarity）。
+ * @param {Object} data.features - 肌・髪・瞳の特徴文（skin/hair/eyes）。
+ * @param {Array} data.colors - 似合う色の配列（各 {id, name, hex}）。
+ * @param {string} data.advice - アドバイス文。
+ * @param {string} data.confidence - 診断の確度（"high"|"medium"|"low"）。
+ * @param {string} data.counseling_hook - カウンセリング誘導の一言。
+ * @returns {string} 結果画面のHTML文字列。
  */
 export function buildResultHTML(data) {
   const theme = SEASON_THEME[data.season] || SEASON_THEME.spring;
@@ -127,7 +154,7 @@ export function buildResultHTML(data) {
         <a class="cta-btn" id="counselingCta" href="#" target="_blank" rel="noopener">カウンセリングを予約する</a>
       </div>
 
-      <div class="restart"><button id="restartBtn">もう一度診断する</button></div>
+      <div class="restart"><button id="restartBtn" class="ghost">もう一度診断する</button></div>
 
       <div class="r-disclaimer">
         この診断は写真から読み取れる範囲での目安です。<br>
@@ -138,7 +165,21 @@ export function buildResultHTML(data) {
 }
 
 /**
- * 結果画面のHTMLを挿入した後に呼ぶ。円環の色玉配置とタップ動作をセットアップ。
+ * 円環パレットの色玉を円周上に配置し、タップで色名を表示する動作を結線する。
+ *
+ * buildResultHTML で挿入されたHTML（円環の器）に対して、似合う色の数だけ
+ * 色玉（.ring-dot）を生成し、円周上に均等配置する。色数が変わっても
+ * （4色でも8色でも）自動で均等に並ぶよう、角度を色数で割って計算している。
+ *
+ * 各色玉をタップすると、中央のシーズン名表示が色名に切り替わる。
+ * 選択状態は selectedIdx で1つだけ保持する。
+ *
+ * HTML挿入後に呼ぶ必要がある。色玉の配置は器（ringStage）の実寸を
+ * offsetWidth で測ってから計算するため、DOMに存在していないと正しく配置できない。
+ *
+ * @param {Array<{id:string, name:string, hex:string}>} colors - 配置する色の配列。
+ *   各要素は色のID・名前・カラーコードを持つ。配列の順に円周上へ時計回りで並ぶ。
+ * @returns {void} 色玉のDOM生成とイベント結線（副作用）が目的。
  */
 export function setupRing(colors) {
   const stage = document.getElementById("ringStage");
@@ -179,7 +220,9 @@ export function setupRing(colors) {
 }
 
 /**
- * カウンセリングCTAのリンク先を設定（後で差し替え可能な仮リンク）
+ * カウンセリングCTAボタンのリンク先URLを設定する。
+ * @param {string} url - カウンセリング予約ページのURL（未指定時は "#"）。
+ * @returns {void}
  */
 export function setupCta(url) {
   const cta = document.getElementById("counselingCta");

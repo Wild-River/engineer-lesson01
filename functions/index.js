@@ -52,7 +52,7 @@ function buildSystemPrompt() {
 function buildUserText() {
     return `この顔写真をパーソナルカラー診断してください。
 
-判定後、その人に特に似合う色を、判定したシーズンの下記パレットから8個選び、その id を best_color_ids に入れてください。パレットにない id を作らないこと。
+判定後、その人に特に似合う色を、判定したシーズンの下記パレットから8個選び、その id を best_color_ids に入れてください。パレットにない id を作らないこと。8個に満たないシーズンはありません（各シーズン12色あります）。
 
 春パレット: ${paletteListText("spring")}
 夏パレット: ${paletteListText("summer")}
@@ -184,3 +184,6 @@ exports.diagnose = onRequest(
         }
     }
 );
+
+// 骨格診断の関数（skeleton.js）を再エクスポートして公開する
+exports.diagnoseSkeleton = require("./skeleton").diagnoseSkeleton;

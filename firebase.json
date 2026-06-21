@@ -23,6 +23,10 @@
       {
         "source": "/api/diagnose",
         "function": "diagnose"
+      },
+      {
+        "source": "/api/diagnose-skeleton",
+        "function": "diagnoseSkeleton"
       }
     ]
   }

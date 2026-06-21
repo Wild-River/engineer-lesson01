@@ -1,34 +1,88 @@
 import "./style.css";
 import { canvasToBase64 } from "./white-balance.js";
+import { homeViewHTML, setupHomeView } from "./views/home-view.js";
 import { guideViewHTML, setupGuideView } from "./views/guide-view.js";
 import { captureViewHTML, setupCaptureView } from "./views/capture-view.js";
 import { buildResultHTML, setupRing, setupCta } from "./views/result-view.js";
+import { skeletonViewHTML, setupSkeletonView } from "./views/skeleton-view.js";
 
 const DIAGNOSE_URL = "/api/diagnose";
 // カウンセリングCTAの仮リンク（後で本番URLに差し替え）
 const COUNSELING_URL = "https://example.com/counseling";
 
-// 画面全体の骨組み。各 view は専用モジュールが生成する。
+// 画面全体の骨組み。トップ（診断選択）+ パーソナルカラー + 骨格の各セクションを持つ。
+// 各 view は専用モジュールが生成する。
 const app = document.getElementById("app");
 app.innerHTML = /*html*/ `
   <div class="wrap">
     <header>
-      <div class="eyebrow">Personal Color</div>
-      <h1>パーソナルカラー診断</h1>
+      <div class="eyebrow">Beauty Analysis</div>
+      <h1>骨格＆パーソナルカラー診断</h1>
     </header>
 
-    <div id="guideView">${guideViewHTML()}</div>
+    <!-- トップ（診断選択） -->
+    <div id="homeView">${homeViewHTML()}</div>
 
-    <div class="hidden" id="captureView">${captureViewHTML()}</div>
+    <!-- パーソナルカラー診断のフロー -->
+    <div class="hidden" id="colorFlow">
+      <button class="back-link" data-back>← 診断を選び直す</button>
+      <div id="guideView">${guideViewHTML()}</div>
+      <div class="hidden" id="captureView">${captureViewHTML()}</div>
+      <div class="hidden" id="resultView"><div id="resultBox"></div></div>
+    </div>
 
-    <div class="hidden" id="resultView"><div id="resultBox"></div></div>
+    <!-- 骨格診断のフロー -->
+    <div class="hidden" id="skeletonFlow">
+      <button class="back-link" data-back>← 診断を選び直す</button>
+      <div id="skeletonView">${skeletonViewHTML()}</div>
+    </div>
   </div>
 `;
 
+const homeView = document.getElementById("homeView");
+const colorFlow = document.getElementById("colorFlow");
+const skeletonFlow = document.getElementById("skeletonFlow");
 const guideView = document.getElementById("guideView");
 const captureView = document.getElementById("captureView");
 const resultView = document.getElementById("resultView");
 const resultBox = document.getElementById("resultBox");
+
+// トップ画面: カードを選ぶと selectDiagnosis に "color" | "skeleton" が渡る
+setupHomeView({ onSelect: selectDiagnosis });
+
+/**
+ * トップで選ばれた診断のフローを表示する。
+ * @param {string} type - "color"（パーソナルカラー）| "skeleton"（骨格）。
+ * @returns {void}
+ */
+function selectDiagnosis(type) {
+  homeView.classList.add("hidden");
+  if (type === "color") {
+    colorFlow.classList.remove("hidden");
+    colorFlow.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else if (type === "skeleton") {
+    skeletonFlow.classList.remove("hidden");
+    skeletonFlow.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+}
+
+// 「← 診断を選び直す」でトップに戻る（両フローの戻りボタン共通）
+document.querySelectorAll("[data-back]").forEach((btn) => {
+  btn.addEventListener("click", backToHome);
+});
+
+/**
+ * 両フローを隠して初期化し、トップ（診断選択）に戻す。
+ * @returns {void}
+ */
+function backToHome() {
+  colorFlow.classList.add("hidden");
+  skeletonFlow.classList.add("hidden");
+  restart();          // パーソナルカラーを初期化
+  skeleton.reset();   // 骨格を初期化（skeleton-view.js の reset に委ねる）
+  homeView.classList.remove("hidden");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 
 // ガイド画面: 「診断をはじめる」で撮影画面へ
 setupGuideView({ onStart: showCapture });
@@ -117,7 +171,7 @@ function showResult(data) {
 }
 
 /**
- * アプリを初期状態（ガイド画面）に戻す。
+ * パーソナルカラー診断を初期状態（ガイド画面）に戻す。
  *
  * 撮影画面の状態リセットは capture.reset() に委ねている。
  * main.js は reset() を呼ぶだけ
@@ -143,3 +197,8 @@ function restart() {
 function showResultRaw(type, msg) {
   resultBox.innerHTML = `<div class="status ${type}">${msg}</div>`;
 }
+
+// === 骨格診断 ===
+// 骨格診断画面をセットアップ。ページ読み込み時から裏で MediaPipe を準備し始める。
+// 返り値の reset は、トップに戻るとき（backToHome）に初期化用として呼ぶ。
+const skeleton = setupSkeletonView();

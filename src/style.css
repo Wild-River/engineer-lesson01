@@ -29,6 +29,7 @@ h1 {
   margin: 0 auto;
 }
 header {
+  text-align: center;
   margin-bottom: 28px;
   border-bottom: 2px solid var(--ink);
   padding-bottom: 16px;
@@ -87,7 +88,7 @@ button {
   font-size: 14px;
   font-weight: 600;
   padding: 11px 18px;
-  border-radius: 9px;
+  border-radius: 100px;
   border: none;
   cursor: pointer;
   background: var(--btn);
@@ -793,12 +794,10 @@ input[type='file'] {
   border-radius: 100px;
   background: var(--sk-tint);
   color: var(--ink);
-  border: 1px solid transparent;
 }
 .sk-tag.avoid {
   background: #f0ede6;
   color: #76716a;
-  border-color: #e0dace;
 }
 
 /* アドバイス */
@@ -874,4 +873,158 @@ input[type='file'] {
   text-align: center;
   margin-top: 44px;
   opacity: 0.8;
+}
+/* ===== トップ画面（診断選択） ===== */
+.home {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 8px 0;
+}
+.home-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;
+}
+.home-card {
+  height: 100%;
+}
+@media (max-width: 560px) {
+  .home-cards {
+    grid-template-columns: 1fr;
+  }
+  .hc-visual {
+    height: 160px;
+  }
+  .hc-visual img {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+  }
+}
+
+.home-card {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  transition:
+    border-color 0.2s,
+    transform 0.15s;
+  font-family: inherit;
+}
+.home-card:hover {
+  border-color: var(--ink);
+  transform: translateY(-2px);
+}
+
+/* ビジュアル領域 */
+.hc-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--paper);
+  border-bottom: 1px solid var(--line);
+  overflow: hidden;
+}
+/* 骨格カードの画像：カード幅いっぱいに全高表示 */
+.hc-visual img {
+  width: 334px;
+  height: 307px;
+  display: block;
+  object-fit: contain;
+}
+
+/* ミニチュア円環：領域の高さに追従して中央配置 */
+.hc-visual-ring {
+  width: 334px;
+  height: 307px;
+  padding: 24px;
+}
+/* ミニチュア円環：PCでは一回り大きく */
+.hc-visual-ring svg {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+/* スマホでは元のサイズ */
+@media (max-width: 560px) {
+  .hc-visual-ring svg {
+    max-width: 130px;
+    max-height: 130px;
+  }
+}
+
+/* PC（横並び）では2枚のカードの高さを揃える */
+.home-cards {
+  align-items: stretch;
+}
+.home-card {
+  height: 100%;
+}
+
+/* スマホ（縦並び）はビジュアル領域を固定高さに */
+@media (max-width: 560px) {
+  .hc-visual {
+    height: 160px;
+  }
+  .hc-visual img {
+    width: auto;
+    height: 100%;
+    max-width: 100%;
+  }
+}
+
+.hc-body {
+  padding: 22px 22px 24px;
+}
+.hc-en {
+  font-family: 'Hiragino Sans', sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.hc-jp {
+  font-family: 'Hiragino Mincho ProN', serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+  color: var(--ink);
+}
+.hc-desc {
+  font-family: 'Hiragino Sans', sans-serif;
+  font-size: 13px;
+  line-height: 1.85;
+  color: var(--mute);
+  margin-bottom: 16px;
+}
+.hc-go {
+  font-family: 'Hiragino Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
+/* 戻りリンク */
+.back-link {
+  font-family: 'Hiragino Sans', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--mute);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  margin-bottom: 18px;
+}
+.back-link:hover {
+  color: var(--ink);
 }

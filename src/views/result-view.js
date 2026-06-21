@@ -62,7 +62,7 @@ export function buildResultHTML(data) {
     const leftActive = val === ax.leftVal ? "axis-pole-active" : "";
     const rightActive = val === ax.rightVal ? "axis-pole-active" : "";
     // mid の場合は中央寄り（明度・彩度のみ）
-    return `
+    return /*html*/ `
       <div class="axis">
         <div class="axis-name">${ax.name}</div>
         <div>
@@ -75,7 +75,7 @@ export function buildResultHTML(data) {
       </div>`;
   }).join("");
 
-  return `
+  return /*html*/ `
     <div class="result" style="
       --season:${theme.accent};
       --season-deep:${theme.accentDeep};

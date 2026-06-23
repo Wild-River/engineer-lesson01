@@ -745,14 +745,13 @@ input[type='file'] {
   border: 1px solid var(--line);
   border-radius: 12px;
 }
-.sk-neck-fig {
+.sk-neck-fig img {
   width: 90px;
-  flex-shrink: 0;
+  height: 90px;
+  object-fit: cover;
+  display: block;
 }
-.sk-neck-fig svg {
-  --fig-line: var(--sk-accent-deep);
-  --fig-fill: var(--sk-tint);
-}
+
 .sk-neck-label {
   font-family: 'Hiragino Sans', sans-serif;
   font-size: 11px;
@@ -909,17 +908,17 @@ input[type='file'] {
   text-align: left;
   cursor: pointer;
   background: #fff;
-  border: 1px solid var(--line);
   border-radius: 14px;
   overflow: hidden;
   transition:
-    border-color 0.2s,
-    transform 0.15s;
+    border-color 0.25s ease,
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
   font-family: inherit;
 }
 .home-card:hover {
-  border-color: var(--ink);
   transform: translateY(-2px);
+  box-shadow: 0 8px 24px var(--line);
 }
 
 /* ビジュアル領域 */

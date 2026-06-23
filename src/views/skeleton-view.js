@@ -215,6 +215,12 @@ export function setupSkeletonView({ onResult } = {}) {
       reset();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
+    // 結果が表示されたら結果画面の先頭まで自動スクロール。
+    // 描画（イラストやレイアウト）が反映されてからスクロールするため
+    // requestAnimationFrame で次の描画タイミングまで待つ。
+    requestAnimationFrame(() => {
+      els.resultView.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   function showResultRaw(type, msg) {

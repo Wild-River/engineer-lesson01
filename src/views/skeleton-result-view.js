@@ -2,23 +2,22 @@
  * 骨格診断の結果画面の描画モジュール（サロン風）。
  *
  * 判定タイプの人物イラストを主役に、3観点の評価・似合うスタイル（ネックライン
- * 図案＋素材/ポイントのタグ）・アドバイス・カウンセリングCTAを構成する。
+ * 画像＋素材/ポイントのタグ）・アドバイス・カウンセリングCTAを構成する。
  * タイプに応じてアクセント色が切り替わる（イラストの色味に合わせる）。
  */
 import { SKELETON_STYLES } from "../skeleton-styles.js";
-import { necklineSVG } from "../skeleton-figures.js";
 
 // タイプ別のテーマ（人物イラストの色味に合わせたアクセント）
 const TYPE_THEME = {
   straight: { accent: "#7fb0c4", accentDeep: "#4f8195", tint: "#eaf3f6", img: "/skeleton-straight.jpg" },
-  wave:     { accent: "#e0a3b8", accentDeep: "#bd7089", tint: "#fbeef2", img: "/skeleton-wave.jpg" },
-  natural:  { accent: "#9bb58c", accentDeep: "#6f8a5e", tint: "#eef3e9", img: "/skeleton-natural.jpg" },
+  wave: { accent: "#e0a3b8", accentDeep: "#bd7089", tint: "#fbeef2", img: "/skeleton-wave.jpg" },
+  natural: { accent: "#9bb58c", accentDeep: "#6f8a5e", tint: "#eef3e9", img: "/skeleton-natural.jpg" },
 };
 
 // 3観点の表示定義
 const AXIS_DEFS = [
-  { key: "frame", name: "フレーム感", map: { fine: "華奢", medium: "中程度", strong: "しっかり" } },
-  { key: "flesh", name: "肉感・質感", map: { soft: "柔らかい", muscular: "ハリがある", bony: "骨感がある" } },
+  { key: "frame", name: "骨格・関節", map: { fine: "華奢", medium: "中程度", strong: "しっかり" } },
+  { key: "flesh", name: "肉質", map: { soft: "柔らかい", muscular: "ハリがある", bony: "薄い・骨感" } },
   { key: "gravity", name: "重心", map: { lower: "下重心", balanced: "偏りが少ない", upper: "上重心" } },
 ];
 
@@ -72,7 +71,7 @@ export function buildSkeletonResultHTML(data) {
         <div class="sk-section-label">見立て</div>
         <div class="sk-features">
           <div class="sk-feature"><div class="sk-ft-label">骨格</div><div class="sk-ft-text">${data.features?.frame || "—"}</div></div>
-          <div class="sk-feature"><div class="sk-ft-label">肉感</div><div class="sk-ft-text">${data.features?.flesh || "—"}</div></div>
+         <div class="sk-feature"><div class="sk-ft-label">肉質</div><div class="sk-ft-text">${data.features?.flesh || "—"}</div></div>
           <div class="sk-feature"><div class="sk-ft-label">バランス</div><div class="sk-ft-text">${data.features?.balance || "—"}</div></div>
         </div>
       </div>
@@ -80,7 +79,9 @@ export function buildSkeletonResultHTML(data) {
       <div class="sk-section">
         <div class="sk-section-label">似合うスタイル</div>
         <div class="sk-neckline">
-          <div class="sk-neck-fig">${necklineSVG(style.neckline)}</div>
+          <div class="sk-neck-fig">
+            <img src="${style.necklineImg}" alt="${style.necklineLabel}" class="sk-neck-img" />
+          </div>
           <div class="sk-neck-info">
             <div class="sk-neck-label">おすすめのネックライン</div>
             <div class="sk-neck-name">${style.necklineLabel}</div>

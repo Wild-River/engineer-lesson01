@@ -3,7 +3,7 @@
  *
  * プロの骨格診断の知見をもとに、各タイプのシルエット・ネックライン・得意素材・
  * 着こなしのポイント・避けたい要素を構造化したもの。
- * SVG図案は silhouette / neckline を、タグ表示は materials / points / avoid を使う。
+ * neckline は画像(necklineImg)で表示、タグは materials / points / avoid を使う。
  *
  * Functions 側でも参照し、Claude が判定したタイプに対応するデータを返す。
  */
@@ -17,6 +17,7 @@ export const SKELETON_STYLES = {
     silhouetteLabel: "Iライン（縦長・直線的）",
     neckline: "v-neck",        // Vネックなど開きのあるネックライン
     necklineLabel: "Vネック・開きのあるネックライン",
+    necklineImg: "/neck-straight.webp",
     materials: ["ハリのある素材", "上質な素材", "厚みのある素材"],
     points: ["ジャストサイズ", "シンプルなデザイン", "引き算のスタイル"],
     avoid: ["過度な装飾", "オーバーサイズ", "首元に厚みが出るデザイン"],
@@ -30,6 +31,7 @@ export const SKELETON_STYLES = {
     silhouetteLabel: "フィット&フレア（曲線的）",
     neckline: "round-neck",    // ラウンド・浅めのネックラインで華奢さを活かす
     necklineLabel: "ラウンドネック・浅めのネックライン",
+    necklineImg: "/neck-wave.webp",
     materials: ["柔らかい素材", "とろみ素材", "シフォン・レース"],
     points: ["ハイウエスト", "上半身にボリューム", "装飾やデザインを活かす"],
     avoid: ["厚手の素材", "ビッグシルエット", "重い・硬い素材"],
@@ -43,6 +45,7 @@ export const SKELETON_STYLES = {
     silhouetteLabel: "リラックス感のあるシルエット",
     neckline: "loose-neck",    // ゆるめ・抜け感
     necklineLabel: "ゆるめ・抜け感のある首元",
+    necklineImg: "/neck-natural.webp",
     materials: ["麻・コットン", "デニム", "ツイード・厚手"],
     points: ["適度な余白", "ラフな着こなし", "大ぶりの小物"],
     avoid: ["タイトすぎる服", "コンパクトすぎる服", "華奢な小物"],

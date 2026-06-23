@@ -1,3 +1,5 @@
+![screenShot](screenShot.webp)
+
 # ①課題名
 
 パーソナルカラー診断（Personal Color Analysis）

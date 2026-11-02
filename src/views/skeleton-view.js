@@ -80,7 +80,7 @@ export function setupSkeletonView({ onResult } = {}) {
     showLoad("info", "骨格検出の準備をしています…（初回は数秒かかります）");
     try {
       const vision = await FilesetResolver.forVisionTasks(
-        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
+        `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${__MEDIAPIPE_VERSION__}/wasm`
       );
       poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
         baseOptions: {

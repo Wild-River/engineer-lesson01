@@ -1,4 +1,10 @@
+import { readFileSync } from "node:fs";
 import { defineConfig, loadEnv } from "vite";
+
+// CDN から読み込む WASM を JS と同じバージョンに揃えるため、インストール済みのバージョンを読み取る
+const { version: mediapipeVersion } = JSON.parse(
+  readFileSync(new URL("./node_modules/@mediapipe/tasks-vision/package.json", import.meta.url))
+);
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -26,6 +32,9 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
+    define: {
+      __MEDIAPIPE_VERSION__: JSON.stringify(mediapipeVersion),
+    },
     build: {
       outDir: "dist",
       emptyOutDir: true,
